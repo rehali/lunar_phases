@@ -7,7 +7,7 @@ Timezone-aware moon phase lookup for any date between 2000-2050.
 Add to your Gemfile:
 
 ```ruby
-gem 'lunar_phases', git: 'https://github.com/yourorg/lunar_phases.git'
+gem 'lunar_phases', git: 'https://github.com/rehali/lunar_phases.git'
 ```
 
 ## Usage
