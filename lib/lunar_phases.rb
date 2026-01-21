@@ -8,7 +8,7 @@ require_relative "lunar_phases/phase"
 #
 # == Installation
 #
-#   gem 'lunar_phases', git: 'https://github.com/yourorg/lunar_phases.git'
+#   gem 'lunar_phases', git: 'https://github.com/rehali/lunar_phases.git'
 #
 # == Quick Start
 #
