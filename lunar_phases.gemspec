@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.description = "Provides timezone-aware moon phase lookups using pre-computed astronomical data. " \
                      "Returns the nearest primary phase (New Moon, 1st Quarter, Full Moon, 3rd Quarter) " \
                      "with day offset for any date in the supported range."
-  spec.homepage = "https://github.com/insatri/lunar_phases"
+  spec.homepage = "https://github.com/rehali/lunar_phases"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.2.0"
 
