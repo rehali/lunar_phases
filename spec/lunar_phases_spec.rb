@@ -180,6 +180,24 @@ RSpec.describe LunarPhases do
       end
     end
 
+    describe "#id" do
+      it "returns the ID for primary phases" do
+        result = LunarPhases.for_date(Date.new(2025, 1, 13))
+        expect(result.id).to eq(14) # Full Moon
+      end
+
+      it "returns the ID for offset phases" do
+        result = LunarPhases.for_date(Date.new(2025, 1, 15))
+        expect(result.id).to eq(16) # Full Moon+2
+      end
+
+      it "returns nil for offsets outside -4 to +4" do
+        # This shouldn't happen in practice, but test the boundary
+        result = LunarPhases.for_date(Date.new(2025, 1, 29)) # New Moon
+        expect(result.id).to eq(0)
+      end
+    end
+
     describe "#waxing? and #waning?" do
       it "correctly identifies waxing phases (New Moon, 1st Quarter)" do
         nm = LunarPhases.for_date(Date.new(2025, 1, 29))

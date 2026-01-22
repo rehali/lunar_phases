@@ -72,6 +72,18 @@ module LunarPhases
     21 => "3rd Quarter", 22 => "3rd Quarter+1", 23 => "3rd Quarter+2", 24 => "3rd Quarter+3", 31 => "3rd Quarter+4"
   }.freeze
 
+  # Reverse mapping: [phase, offset] => legacy_id
+  LEGACY_IDS_REVERSE = {
+    [:new_moon, -4] => 38, [:new_moon, -3] => 25, [:new_moon, -2] => 26, [:new_moon, -1] => 27,
+    [:new_moon, 0] => 0, [:new_moon, 1] => 1, [:new_moon, 2] => 2, [:new_moon, 3] => 3, [:new_moon, 4] => 28,
+    [:first_quarter, -4] => 37, [:first_quarter, -3] => 4, [:first_quarter, -2] => 5, [:first_quarter, -1] => 6,
+    [:first_quarter, 0] => 7, [:first_quarter, 1] => 8, [:first_quarter, 2] => 9, [:first_quarter, 3] => 10, [:first_quarter, 4] => 29,
+    [:full_moon, -4] => 39, [:full_moon, -3] => 11, [:full_moon, -2] => 12, [:full_moon, -1] => 13,
+    [:full_moon, 0] => 14, [:full_moon, 1] => 15, [:full_moon, 2] => 16, [:full_moon, 3] => 17, [:full_moon, 4] => 30,
+    [:third_quarter, -4] => 36, [:third_quarter, -3] => 18, [:third_quarter, -2] => 19, [:third_quarter, -1] => 20,
+    [:third_quarter, 0] => 21, [:third_quarter, 1] => 22, [:third_quarter, 2] => 23, [:third_quarter, 3] => 24, [:third_quarter, 4] => 31
+  }.freeze
+
   # Result object returned by phase lookups.
   #
   # == Attributes
@@ -150,6 +162,14 @@ module LunarPhases
     #
     def waning?
       %i[full_moon third_quarter].include?(primary_phase)
+    end
+
+    # Returns the legacy ID for this phase/offset combination.
+    #
+    #   result.id  # => 14 for Full Moon, 16 for Full Moon+2, etc.
+    #
+    def id
+      LEGACY_IDS_REVERSE[[primary_phase, offset]]
     end
   end
 
