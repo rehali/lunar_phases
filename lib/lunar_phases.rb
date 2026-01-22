@@ -3,8 +3,7 @@
 require_relative "lunar_phases/version"
 require_relative "lunar_phases/phase"
 
-# LunarPhases provides timezone-aware moon phase lookups for any date
-# between 2000 and 2050.
+# LunarPhases provides moon phase lookups for dates between 2000 and 2050.
 #
 # == Installation
 #
@@ -14,23 +13,23 @@ require_relative "lunar_phases/phase"
 #
 #   require 'lunar_phases'
 #
-#   # Get phase for today
-#   result = LunarPhases.for_date(Date.today, "Australia/Brisbane")
-#   puts result.name        # => "Full Moon+2"
-#   puts result.short_name  # => "FM+2"
+#   # Get phase for a local date
+#   result = LunarPhases.for_date(Date.new(2025, 1, 14))
+#   puts result.name  # => "Full Moon"
+#
+#   # Get phase for a UTC datetime in a timezone
+#   result = LunarPhases.for_datetime("2025-01-13T20:00:00Z", "Australia/Brisbane")
+#   puts result.name  # => "Full Moon" (20:00 UTC = 06:00 Jan 14 Brisbane)
+#   puts result.date  # => 2025-01-14
 #
 #   # Check for specific phases
-#   LunarPhases.full_moon?(Date.today)  # => false
-#   LunarPhases.new_moon?(Date.today)   # => false
+#   LunarPhases.full_moon?(Date.new(2025, 1, 13))  # => true
+#   LunarPhases.new_moon?(Date.new(2025, 1, 29))   # => true
 #
-#   # Find phases in a date range
-#   LunarPhases.phases_in_range(Date.new(2025,1,1), Date.new(2025,12,31))
+# == Two Lookup Methods
 #
-# == Timezone Handling
-#
-# Moon phases occur at specific UTC instants. The calendar date depends
-# on the observer's timezone. For example, a Full Moon at 22:27 UTC on
-# January 13 falls on January 14 in Brisbane (UTC+10).
+# * +for_date+ - Use when you already have the local date
+# * +for_datetime+ - Use when you have a UTC datetime and need timezone conversion
 #
 # == Result Object
 #
@@ -52,39 +51,54 @@ require_relative "lunar_phases/phase"
 #
 module LunarPhases
   class << self
-    # Looks up the moon phase for a given date and timezone.
+    # Looks up the moon phase for a local date.
     #
-    # See LunarPhases::Phase.for_date for full documentation.
+    # Use this when you already have the date in local time.
+    # If you have a UTC datetime, use for_datetime instead.
     #
     # == Example
     #
-    #   LunarPhases.for_date(Date.today, "Australia/Brisbane")
-    #   # => #<LunarPhases::Result name="Full Moon+2" ...>
+    #   LunarPhases.for_date(Date.new(2025, 1, 14))
+    #   # => #<LunarPhases::Result name="Full Moon" ...>
     #
-    def for_date(date, timezone = Phase::DEFAULT_TIMEZONE)
-      Phase.for_date(date, timezone)
+    def for_date(date)
+      Phase.for_date(date)
+    end
+
+    # Looks up the moon phase for a UTC datetime in a specific timezone.
+    #
+    # Converts the UTC datetime to local date, then returns the phase.
+    #
+    # == Example
+    #
+    #   # 20:00 UTC on Jan 13 = 06:00 Jan 14 in Brisbane
+    #   LunarPhases.for_datetime("2025-01-13T20:00:00Z", "Australia/Brisbane")
+    #   # => #<LunarPhases::Result name="Full Moon" date=2025-01-14 ...>
+    #
+    def for_datetime(datetime, timezone)
+      Phase.for_datetime(datetime, timezone)
     end
 
     # Returns true if the given date is exactly a Full Moon.
     #
     # == Example
     #
-    #   LunarPhases.full_moon?(Date.new(2025, 1, 14), "Australia/Brisbane")
+    #   LunarPhases.full_moon?(Date.new(2025, 1, 13))
     #   # => true
     #
-    def full_moon?(date, timezone = Phase::DEFAULT_TIMEZONE)
-      Phase.full_moon?(date, timezone)
+    def full_moon?(date)
+      Phase.full_moon?(date)
     end
 
     # Returns true if the given date is exactly a New Moon.
     #
     # == Example
     #
-    #   LunarPhases.new_moon?(Date.new(2025, 1, 29), "Australia/Brisbane")
+    #   LunarPhases.new_moon?(Date.new(2025, 1, 29))
     #   # => true
     #
-    def new_moon?(date, timezone = Phase::DEFAULT_TIMEZONE)
-      Phase.new_moon?(date, timezone)
+    def new_moon?(date)
+      Phase.new_moon?(date)
     end
 
     # Returns the phase name for a legacy ID.
@@ -99,8 +113,6 @@ module LunarPhases
     end
 
     # Returns all primary phases within a date range.
-    #
-    # See LunarPhases::Phase.phases_in_range for full documentation.
     #
     # == Example
     #
@@ -130,7 +142,7 @@ module LunarPhases
     # == Example
     #
     #   LunarPhases.detailed_collection
-    #   # => [["New Moon-4", "new_moon:-4"], ...]
+    #   # => [["New Moon-4", "New Moon-4"], ...]
     #
     def detailed_collection
       Phase.detailed_collection

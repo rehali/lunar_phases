@@ -168,16 +168,57 @@ module LunarPhases
     DEFAULT_TIMEZONE = "Australia/Brisbane"
 
     class << self
-      # Looks up the moon phase for a given date and timezone.
+      # Looks up the moon phase for a given local date.
       #
-      # Each date is assigned to its nearest primary phase (New Moon,
-      # 1st Quarter, Full Moon, or 3rd Quarter) with an offset indicating
-      # days before (-) or after (+) that phase.
+      # Use this when you already have the local date. If you have a UTC
+      # datetime and need to convert to local date first, use for_datetime.
       #
       # == Parameters
       #
-      # * +date+ - A Date object or String parseable as a date
-      # * +timezone+ - IANA timezone name (default: "Australia/Brisbane")
+      # * +date+ - A Date object or String in YYYY-MM-DD format
+      #
+      # == Returns
+      #
+      # A Result object containing the phase information.
+      #
+      # == Raises
+      #
+      # * +ArgumentError+ if the date is outside the valid range (2000-2050)
+      #
+      # == Example
+      #
+      #   result = LunarPhases::Phase.for_date(Date.new(2025, 1, 14))
+      #   result.name  # => "Full Moon"
+      #
+      def for_date(date)
+        date = Date.parse(date.to_s) unless date.is_a?(Date)
+        validate_date!(date)
+
+        # Use UTC for phase lookup since date is already local
+        day_midpoint = Time.utc(date.year, date.month, date.day, 12, 0, 0)
+
+        nearest = find_nearest_phase(day_midpoint)
+        phase_date = nearest[:time].utc.to_date
+        offset = (date - phase_date).to_i
+
+        Result.new(
+          date: date,
+          timezone: "UTC",
+          primary_phase: nearest[:phase].to_sym,
+          offset: offset,
+          phase_time: nearest[:time]
+        )
+      end
+
+      # Looks up the moon phase for a UTC datetime in a specific timezone.
+      #
+      # Converts the UTC datetime to local date in the given timezone,
+      # then returns the moon phase for that local date.
+      #
+      # == Parameters
+      #
+      # * +datetime+ - A Time, DateTime, or ISO8601 String (e.g., "2025-01-13T20:00:00Z")
+      # * +timezone+ - IANA timezone name (e.g., "Australia/Brisbane")
       #
       # == Returns
       #
@@ -190,23 +231,31 @@ module LunarPhases
       #
       # == Example
       #
-      #   result = LunarPhases::Phase.for_date(Date.new(2025, 1, 14), "Australia/Brisbane")
+      #   # 20:00 UTC on Jan 13 = 06:00 Jan 14 in Brisbane
+      #   result = LunarPhases::Phase.for_datetime("2025-01-13T20:00:00Z", "Australia/Brisbane")
       #   result.name  # => "Full Moon"
+      #   result.date  # => #<Date: 2025-01-14>
       #
-      #   result = LunarPhases::Phase.for_date("2025-01-16", "Europe/London")
-      #   result.name  # => "Full Moon+3"
-      #
-      def for_date(date, timezone = DEFAULT_TIMEZONE)
-        date = Date.parse(date.to_s) unless date.is_a?(Date)
+      def for_datetime(datetime, timezone)
+        zone = find_timezone(timezone)
+
+        utc_time = case datetime
+                   when Time
+                     datetime.utc
+                   when DateTime
+                     datetime.to_time.utc
+                   when String
+                     Time.parse(datetime).utc
+                   else
+                     raise ArgumentError, "datetime must be a Time, DateTime, or ISO8601 String"
+                   end
+
+        date = utc_to_local_date(zone, utc_time)
         validate_date!(date)
 
-        zone = find_timezone(timezone)
         day_midpoint = local_to_utc(zone, date.year, date.month, date.day, 12, 0, 0)
 
-        # Find the nearest primary phase
         nearest = find_nearest_phase(day_midpoint)
-
-        # Calculate offset in days
         phase_date = utc_to_local_date(zone, nearest[:time])
         offset = (date - phase_date).to_i
 
@@ -223,11 +272,11 @@ module LunarPhases
       #
       # == Example
       #
-      #   LunarPhases::Phase.full_moon?(Date.new(2025, 1, 14), "Australia/Brisbane")
+      #   LunarPhases::Phase.full_moon?(Date.new(2025, 1, 13))
       #   # => true
       #
-      def full_moon?(date, timezone = DEFAULT_TIMEZONE)
-        result = for_date(date, timezone)
+      def full_moon?(date)
+        result = for_date(date)
         result.primary_phase == :full_moon && result.offset == 0
       end
 
@@ -235,11 +284,11 @@ module LunarPhases
       #
       # == Example
       #
-      #   LunarPhases::Phase.new_moon?(Date.new(2025, 1, 29), "Australia/Brisbane")
+      #   LunarPhases::Phase.new_moon?(Date.new(2025, 1, 29))
       #   # => true
       #
-      def new_moon?(date, timezone = DEFAULT_TIMEZONE)
-        result = for_date(date, timezone)
+      def new_moon?(date)
+        result = for_date(date)
         result.primary_phase == :new_moon && result.offset == 0
       end
 
