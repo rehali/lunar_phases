@@ -32,8 +32,8 @@ phases = LunarPhases.phases_in_range(Date.new(2025, 1, 1), Date.new(2025, 12, 31
 phases.each { |p| puts "#{p.date}: #{p.name}" }
 
 # For select boxes
-LunarPhases.collection           # => [["New Moon", :new_moon], ...]
-LunarPhases.detailed_collection  # => [["New Moon-4", "new_moon:-4"], ...]
+LunarPhases.collection           # => [["New Moon", "New Moon"], ...]
+LunarPhases.detailed_collection  # => [["New Moon-4", "New Moon-4"], ...]
 
 # Check valid date range
 LunarPhases.valid_range  # => Date(2000-01-06)..Date(2050-12-21)

@@ -121,9 +121,9 @@ RSpec.describe LunarPhases do
       collection = LunarPhases.detailed_collection
 
       expect(collection.length).to eq(36) # 4 phases × 9 offsets
-      expect(collection).to include(["New Moon", "new_moon:0"])
-      expect(collection).to include(["Full Moon+2", "full_moon:2"])
-      expect(collection).to include(["1st Quarter-3", "first_quarter:-3"])
+      expect(collection).to include(["New Moon", "New Moon"])
+      expect(collection).to include(["Full Moon+2", "Full Moon+2"])
+      expect(collection).to include(["1st Quarter-3", "1st Quarter-3"])
     end
   end
 

@@ -56,6 +56,22 @@ module LunarPhases
     third_quarter: "3Q"
   }.freeze
 
+  # Legacy ID mapping for backward compatibility with existing databases.
+  #
+  #   LEGACY_IDS[14]  # => "Full Moon"
+  #   LEGACY_IDS[16]  # => "Full Moon+2"
+  #
+  LEGACY_IDS = {
+    38 => "New Moon-4", 25 => "New Moon-3", 26 => "New Moon-2", 27 => "New Moon-1",
+    0 => "New Moon", 1 => "New Moon+1", 2 => "New Moon+2", 3 => "New Moon+3", 28 => "New Moon+4",
+    37 => "1st Quarter-4", 4 => "1st Quarter-3", 5 => "1st Quarter-2", 6 => "1st Quarter-1",
+    7 => "1st Quarter", 8 => "1st Quarter+1", 9 => "1st Quarter+2", 10 => "1st Quarter+3", 29 => "1st Quarter+4",
+    39 => "Full Moon-4", 11 => "Full Moon-3", 12 => "Full Moon-2", 13 => "Full Moon-1",
+    14 => "Full Moon", 15 => "Full Moon+1", 16 => "Full Moon+2", 17 => "Full Moon+3", 30 => "Full Moon+4",
+    36 => "3rd Quarter-4", 18 => "3rd Quarter-3", 19 => "3rd Quarter-2", 20 => "3rd Quarter-1",
+    21 => "3rd Quarter", 22 => "3rd Quarter+1", 23 => "3rd Quarter+2", 24 => "3rd Quarter+3", 31 => "3rd Quarter+4"
+  }.freeze
+
   # Result object returned by phase lookups.
   #
   # == Attributes
@@ -227,6 +243,26 @@ module LunarPhases
         result.primary_phase == :new_moon && result.offset == 0
       end
 
+      # Returns the phase name for a legacy ID.
+      #
+      # == Parameters
+      #
+      # * +id+ - Legacy phase ID (Integer)
+      #
+      # == Returns
+      #
+      # Phase name as String, or nil if ID is unknown.
+      #
+      # == Example
+      #
+      #   LunarPhases::Phase.for_id(14)  # => "Full Moon"
+      #   LunarPhases::Phase.for_id(16)  # => "Full Moon+2"
+      #   LunarPhases::Phase.for_id(999) # => nil
+      #
+      def for_id(id)
+        LEGACY_IDS[id.to_i]
+      end
+
       # Returns all primary phases within a date range.
       #
       # Useful for calendars or finding upcoming Full Moons.
@@ -298,12 +334,12 @@ module LunarPhases
       #
       # == Returns
       #
-      # Array of [name, value] pairs where value is "phase:offset".
+      # Array of [name, name] pairs for use in select boxes.
       #
       # == Example
       #
       #   LunarPhases::Phase.detailed_collection
-      #   # => [["New Moon-4", "new_moon:-4"], ["New Moon-3", "new_moon:-3"], ...]
+      #   # => [["New Moon-4", "New Moon-4"], ["New Moon-3", "New Moon-3"], ...]
       #
       def detailed_collection
         phases = %i[new_moon first_quarter full_moon third_quarter]
@@ -313,7 +349,7 @@ module LunarPhases
           offsets.map do |offset|
             base = PHASE_NAMES[phase]
             name = offset == 0 ? base : "#{base}#{offset > 0 ? '+' : ''}#{offset}"
-            [name, "#{phase}:#{offset}"]
+            [name, name]
           end
         end
       end

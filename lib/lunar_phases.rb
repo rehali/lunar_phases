@@ -8,7 +8,7 @@ require_relative "lunar_phases/phase"
 #
 # == Installation
 #
-#   gem 'lunar_phases', git: 'https://github.com/rehali/lunar_phases.git'
+#   gem 'lunar_phases', git: 'https://github.com/yourorg/lunar_phases.git'
 #
 # == Quick Start
 #
@@ -85,6 +85,17 @@ module LunarPhases
     #
     def new_moon?(date, timezone = Phase::DEFAULT_TIMEZONE)
       Phase.new_moon?(date, timezone)
+    end
+
+    # Returns the phase name for a legacy ID.
+    #
+    # == Example
+    #
+    #   LunarPhases.for_id(14)  # => "Full Moon"
+    #   LunarPhases.for_id(16)  # => "Full Moon+2"
+    #
+    def for_id(id)
+      Phase.for_id(id)
     end
 
     # Returns all primary phases within a date range.
