@@ -394,7 +394,9 @@ module LunarPhases
       end
 
       def find_nearest_phase(utc_time)
-        data.min_by { |p| (p[:time] - utc_time).abs }
+        # When equidistant between two phases, prefer the earlier one
+        # This gives +4 offset rather than -4 for boundary days
+        data.min_by { |p| [(p[:time] - utc_time).abs, p[:time]] }
       end
 
       def find_timezone(name)
