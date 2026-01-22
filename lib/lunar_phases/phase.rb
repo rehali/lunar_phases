@@ -394,12 +394,7 @@ module LunarPhases
       end
 
       def find_nearest_phase(utc_time)
-        # Round to days before comparing, so boundary days pick consistently
-        # When equidistant in days, prefer the earlier phase (+4 not -4)
-        data.min_by do |p|
-          distance_in_days = ((p[:time] - utc_time).abs / 86400.0).round
-          [distance_in_days, p[:time]]
-        end
+        data.min_by { |p| (p[:time] - utc_time).abs }
       end
 
       def find_timezone(name)
